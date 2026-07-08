@@ -14,7 +14,7 @@
 
 > _Add your screenshot here — replace `demo.png` with your actual file_
 
-![App Demo](screenshot.png)
+![App Demo](demo.png)
 
 ---
 
