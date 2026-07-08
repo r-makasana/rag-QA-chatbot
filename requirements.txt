@@ -1,0 +1,13 @@
+langchain==0.3.25
+langchain-core==0.3.65
+langchain-community==0.3.24
+langchain-text-splitters==0.3.8
+langchain-huggingface==0.1.2
+langchain-groq==0.3.2
+faiss-cpu==1.9.0
+pypdf==5.1.0
+sentence-transformers==3.3.1
+streamlit==1.41.0
+python-dotenv==1.0.1
+validators==0.34.0
+beautifulsoup4==4.12.3
