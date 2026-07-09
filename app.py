@@ -420,15 +420,55 @@ def build_chain(docs):
     llm = ChatGroq(model="llama-3.1-8b-instant")
 
     contextualize_prompt = ChatPromptTemplate.from_messages([
-        ("system", "Given chat history and the latest question, rephrase as a standalone question. Don't answer."),
+        ("system", """Given chat history and the latest question,
+         rephrase it as a standalone question. Don't answer it."""),
         MessagesPlaceholder("chat_history"),
         ("human", "{input}")
     ])
 
-    history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_prompt)
+    history_aware_retriever = create_history_aware_retriever(
+        llm, retriever, contextualize_prompt
+    )
 
+    # ── PROMPT ENGINEERING: CoT + ReAct + Few-Shot combined ──
     answer_prompt = ChatPromptTemplate.from_messages([
-        ("system", "Answer using only the context below. Be concise and clear.\n\nContext: {context}"),
+        ("system", """You are a precise document assistant. Answer questions
+using ONLY the context provided below.
+
+Follow this reasoning process (ReAct):
+- Thought: Analyze what the question is really asking
+- Observation: Identify the most relevant information from context
+- Answer: Provide a clear, structured response
+
+Use Chain-of-Thought for complex questions:
+- Break down your reasoning step by step
+- Connect evidence from the context to your conclusion
+- State your final answer clearly
+
+Format every answer like these examples (Few-Shot):
+
+Example 1:
+Question: What is a qubit?
+Thought: The question asks for a definition of the fundamental unit.
+Observation: The context explains qubits in the introduction section.
+Answer:
+[Definition] A qubit is the basic unit of quantum information.
+[How it works] Unlike classical bits which are 0 or 1, qubits can
+exist in superposition — both states simultaneously.
+[Significance] This property enables quantum parallelism.
+
+Example 2:
+Question: How does quantum entanglement work?
+Thought: This requires explaining a quantum phenomenon with cause and effect.
+Observation: Context covers entanglement in the quantum mechanics chapter.
+Answer:
+[Definition] Entanglement links two qubits so measuring one instantly
+affects the other, regardless of distance.
+[Mechanism] When qubits interact, their quantum states become correlated.
+[Application] Used in quantum teleportation and quantum cryptography.
+
+Now follow the same format for the user's question.
+Context: {context}"""),
         MessagesPlaceholder("chat_history"),
         ("human", "{input}")
     ])
@@ -443,7 +483,6 @@ def build_chain(docs):
         history_messages_key="chat_history",
         output_messages_key="answer"
     )
-
 def reset_state():
     st.session_state.chain = None
     st.session_state.chat_history = []
